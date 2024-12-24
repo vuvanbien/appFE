@@ -1,0 +1,134 @@
+<h2 style="font-weight: bold;text-align: center;">Sản phẩm</h2>
+<div style="display: flex; justify-content: flex-end; margin: 16px">
+  <div style="text-align: right;">
+    <button nz-button nzType="primary" (click)="showModal()">
+      <i nz-icon nzType="plus" nzTheme="outline"></i>
+      <span>Thêm mới</span>
+    </button>
+  </div>
+</div>
+
+<!-- Modal Form -->
+<nz-modal
+  [(nzVisible)]="isVisible"
+  [nzTitle]="modalTitle"
+  [nzOkText]="isEditing ? 'Cập nhật' : 'Thêm'"
+  [nzCancelText]="'Hủy'"
+  [nzOkLoading]="isOkLoading"
+  (nzOnCancel)="handleCancel()"
+  (nzOnOk)="handleOk()">
+  
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="validateForm">
+      <!-- Tên sản phẩm -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Tên sản phẩm</nz-form-label>
+        <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Vui lòng nhập tên sản phẩm!">
+          <input nz-input formControlName="name" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Mô tả -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Mô tả</nz-form-label>
+        <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Vui lòng nhập mô tả!">
+          <textarea nz-input formControlName="description" rows="4"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Giá -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Giá</nz-form-label>
+        <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Vui lòng nhập giá!">
+          <nz-input-number formControlName="price" [nzMin]="0" [nzStep]="1000" style="width: 100%"></nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Tồn kho -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Tồn kho</nz-form-label>
+        <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Vui lòng nhập số lượng tồn kho!">
+          <nz-input-number formControlName="stock" [nzMin]="0" style="width: 100%"></nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Danh mục -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Danh mục</nz-form-label>
+        <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Vui lòng chọn danh mục!">
+          <nz-select formControlName="category">
+            <nz-option *ngFor="let category of categories" [nzValue]="category._id" [nzLabel]="category.name"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Thương hiệu -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Thương hiệu</nz-form-label>
+        <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Vui lòng chọn thương hiệu!">
+          <nz-select formControlName="brand">
+            <nz-option *ngFor="let brand of brands" [nzValue]="brand._id" [nzLabel]="brand.name"></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Upload ảnh -->
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired>Hình ảnh</nz-form-label>
+        <nz-form-control [nzSm]="14" [nzXs]="24" nzErrorTip="Vui lòng chọn hình ảnh!">
+          <input type="file" (change)="handleImageUpload($event)" accept="image/*" style="display: none" #fileInput>
+          <button nz-button (click)="fileInput.click()">
+            <i nz-icon nzType="upload"></i>
+            Chọn ảnh
+          </button>
+          <img *ngIf="imageUrl" [src]="imageUrl" style="max-width: 200px; margin-top: 10px;" />
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>
+
+<!-- Table -->
+<nz-table nzBordered="500" #editRowTable [nzData]="product" [nzFrontPagination]="true" [nzPageSize]="8"
+  [nzShowPagination]="true" nzTableLayout="fixed">
+  <thead>
+    <tr>
+      <th *ngFor="let column of listOfColumns" [(nzSortOrder)]="column.sortOrder" [nzSortFn]="column.sortFn"
+        [style.width]="column.width" [nzFilters]="column.listOfFilter" [nzFilterFn]="column.filterFn"
+        style="background-color: rgb(31, 165, 218); color: white;">
+        {{ column.name }}
+      </th>
+      <th style="background-color: rgb(31, 165, 218); color: white;">Hình ảnh</th>
+      <th style="background-color: rgb(31, 165, 218); color: white;">Giá</th>
+      <th style="background-color: rgb(31, 165, 218); color: white;">Đã bán</th>
+      <th style="background-color: rgb(31, 165, 218); color: white;">Tồn kho</th>
+      <th style="background-color: rgb(31, 165, 218); color: white;">Loại sản phẩm</th>
+      <th style="background-color: rgb(31, 165, 218); color: white;">Thương hiệu</th>
+      <th style="background-color: rgb(31, 165, 218); color: white;">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let data of editRowTable.data; trackBy: trackByFn">
+      <td (click)="selectRow(data._id)">{{ data.name }}</td>
+      <td>
+        <img [src]="'assets/img/' + data.image" alt="Hình ảnh sản phẩm" style="max-width: 100px; height: auto;" *ngIf="data.image" />
+      </td>
+      <td>{{data.price}} VND</td>
+      <td>{{data.sold}}</td>
+      <td>{{data.stock}}</td>
+      <td>{{categoryMap[data.category]}}</td>
+      <td>{{brandMap[data.brand]}}</td>
+      <td>
+        <i nz-icon nzType="edit" nzTheme="outline" 
+           (click)="startEdit(data)"
+           style="color: #0d67e9; font-size: 18px; cursor: pointer;"></i>
+           <i nz-icon nzType="delete" nzTheme="outline" 
+           nz-popconfirm
+           nzPopconfirmTitle="Bạn có chắc chắn muốn xóa sản phẩm này?"
+           nzPopconfirmPlacement="top"
+           (nzOnConfirm)="deleteProduct(data._id)"
+           style="color: #ff3f70; margin-left: 10px; font-size: 18px; cursor: pointer;"></i>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>

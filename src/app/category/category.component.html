@@ -1,0 +1,99 @@
+<h2 style="font-weight: bold;text-align: center;">Loại sản phẩm</h2>
+<div style="display: flex; justify-content: flex-end; margin: 16px">
+    <div style="text-align: right;">
+      <button  class="btn btn-primary" (click)="addNewRow()">
+        <i nz-icon nzType="plus" nzTheme="outline" style="color: #eff1f4; font-size: 18px; cursor: pointer;"></i>
+        <span>Thêm mới</span>
+      </button>
+    </div>
+</div>
+  
+<nz-table nzBordered="500" #editRowTable [nzData]="category" [nzFrontPagination]="true" [nzPageSize]="4" [nzShowPagination]="true" nzTableLayout="fixed" >
+    <thead>
+      <tr>
+        <th *ngFor="let column of listOfColumns" 
+            [(nzSortOrder)]="column.sortOrder" 
+            [nzSortFn]="column.sortFn"
+            [style.width]="column.width" 
+            [nzFilters]="column.listOfFilter" 
+            [nzFilterFn]="column.filterFn"
+            style="background-color: rgb(31, 165, 218); color: white;">
+          {{ column.name }}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Hàng thêm mới -->
+      <tr *ngIf="isAdding">
+        <td>
+          <input type="text" 
+                 nz-input 
+                 [(ngModel)]="newRow.name" 
+                 placeholder="Nhập tên loại sản phẩm" />
+        </td>
+        <td>
+          <i nz-icon 
+             nzType="check" 
+             nzTheme="outline" 
+             (click)="saveNewRow()" 
+             style="color: #0d67e9; font-size: 18px; cursor: pointer;">
+          </i>
+          <i nz-icon 
+             nzType="close" 
+             nzTheme="outline" 
+             (click)="cancelAdd()" 
+             style="color: #f30808; margin-left: 10px; font-size: 18px; cursor: pointer;">
+          </i>
+        </td>
+      </tr>
+      <!-- Danh sách dữ liệu -->
+      <tr *ngFor="let data of editRowTable.data; trackBy: trackByFn">
+        <!-- Chế độ xem (không chỉnh sửa) -->
+        <ng-container *ngIf="!editCache[data._id]?.edit; else editMode">
+          <td (click)="selectRow(data._id)">{{ data.name }}</td>
+          <td>
+            <i nz-icon 
+               nzType="edit" 
+               nzTheme="outline" 
+               (click)="startEdit(data._id)" 
+               style="color: #0d67e9; font-size: 18px; cursor: pointer;">
+            </i>
+            <i nz-icon 
+               nzType="delete" 
+               nzTheme="outline" 
+               nz-popconfirm 
+               nzPopconfirmTitle="Bạn có chắc chắn muốn xóa?" 
+               (nzOnConfirm)="deleteCategory(data._id)" 
+               style="color: #ff3f70; margin-left: 10px; font-size: 18px; cursor: pointer;">
+            </i>
+          </td>
+        </ng-container>
+        <!-- Chế độ chỉnh sửa -->
+        <ng-template #editMode>
+          <td>
+            <input type="text" 
+                   nz-input 
+                   [(ngModel)]="editCache[data._id].data.name" 
+                   placeholder="Nhập tên loại sản phẩm" />
+          </td>
+          <td>
+            <i nz-icon 
+               nzType="check" 
+               nzTheme="outline" 
+               (click)="saveEdit(data._id)" 
+               style="color: #0d67e9; font-size: 18px; cursor: pointer;">
+            </i>
+            <i nz-icon 
+               nzType="close" 
+               nzTheme="outline" 
+               nz-popconfirm 
+               nzPopconfirmTitle="Bạn có chắc chắn muốn hủy?" 
+               (click)="cancelEdit(data._id)" 
+               style="color: #f30808; margin-left: 10px; font-size: 18px; cursor: pointer;">
+            </i>
+          </td>
+        </ng-template>
+      </tr>
+    </tbody>
+  </nz-table>
+
